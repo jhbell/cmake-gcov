@@ -28,7 +28,15 @@ add_custom_command(TARGET gcov
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
 add_custom_command(TARGET gcov
-    COMMAND gcov -b ${CMAKE_SOURCE_DIR}/*.cpp -o ${OBJECT_DIR} | grep -A 5 "Hello.cpp" > Coverage.tmp
+    COMMAND echo "=================== GCOV ===================="
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+add_custom_command(TARGET gcov
+    COMMAND gcov -b ${CMAKE_SOURCE_DIR}/*.cpp -o ${OBJECT_DIR} | grep -A 5 "Hello.cpp" > TestHello.tmp
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/coverage
+    )
+add_custom_command(TARGET gcov
+    COMMAND cat TestHello.tmp
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/coverage
     )
 add_custom_command(TARGET gcov
