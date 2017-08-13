@@ -1,47 +1,53 @@
 cmake_minimum_required(VERSION 3.5)
 project(Hello CXX)
 
+# Set the compiler options
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "-g -O0 -Wall -fprofile-arcs -ftest-coverage")
 set(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE ON)
 
-set(CMAKE_FILES_DIRECTORY ${CMAKE_BINARY_DIR})
+# Create OBJECT_DIR variable
 set(OBJECT_DIR ${CMAKE_BINARY_DIR}/CMakeFiles/RunHello.dir)
-set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES coverage)
+message("-- Object files will be output to: ${OBJECT_DIR}")
 
-message("-- Object files have been output to: ${OBJECT_DIR}")
-
-add_executable(RunHello RunHello.cpp Hello.cpp)
-
-enable_testing()
-
-add_test(output_test ${CMAKE_CURRENT_BINARY_DIR}/RunHello)
-set_tests_properties(output_test PROPERTIES PASS_REGULAR_EXPRESSION "Hello")
-
-add_custom_target(gcov)
-add_custom_command(TARGET gcov
-    COMMAND mkdir -p coverage
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+# Set the sources
+set(SOURCES
+    RunHello.cpp
+    Hello.cpp
     )
-add_custom_command(TARGET gcov
+
+# Create the executable
+add_executable(RunHello ${SOURCES})
+
+# Create the gcov target. Run coverage tests with 'make gcov'
+add_custom_target(gcov
+    COMMAND mkdir -p coverage
     COMMAND make test
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
 add_custom_command(TARGET gcov
     COMMAND echo "=================== GCOV ===================="
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    )
-add_custom_command(TARGET gcov
-    COMMAND gcov -b ${CMAKE_SOURCE_DIR}/*.cpp -o ${OBJECT_DIR} | grep -A 5 "Hello.cpp" > TestHello.tmp
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/coverage
-    )
-add_custom_command(TARGET gcov
-    COMMAND cat TestHello.tmp
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/coverage
-    )
-add_custom_command(TARGET gcov
+    COMMAND gcov -b ${CMAKE_SOURCE_DIR}/*.cpp -o ${OBJECT_DIR}
+            | grep -A 5 "Hello.cpp" > CoverageSummary.tmp
+    COMMAND cat CoverageSummary.tmp
     COMMAND echo "-- Coverage files have been output to ${CMAKE_BINARY_DIR}/coverage"
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/coverage  # Need separate command for this line
+    )
+add_dependencies(gcov RunHello)
+# Make sure to clean up the coverage folder
+set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES coverage)
+
+# Create the scrub target. This cleans the build as well as generated .gcda
+# and .gcno files.
+add_custom_target(scrub
+    COMMAND ${CMAKE_MAKE_PROGRAM} clean
+    COMMAND rm -f ${OBJECT_DIR}/*.gcno
+    COMMAND rm -f ${OBJECT_DIR}/*.gcda
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
 
-add_dependencies(gcov RunHello)
+# Testing
+enable_testing()
+
+add_test(output_test ${CMAKE_CURRENT_BINARY_DIR}/RunHello)
+set_tests_properties(output_test PROPERTIES PASS_REGULAR_EXPRESSION "Hello")
