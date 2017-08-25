@@ -37,8 +37,8 @@ add_dependencies(gcov RunAdder)
 # Make sure to clean up the coverage folder
 set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES coverage)
 
-# Create the scrub target. This cleans the build as well as generated .gcda
-# and .gcno files.
+# Create the gcov-clean target. This cleans the build as well as generated 
+# .gcda and .gcno files.
 add_custom_target(scrub
     COMMAND ${CMAKE_MAKE_PROGRAM} clean
     COMMAND rm -f ${OBJECT_DIR}/*.gcno
@@ -50,4 +50,4 @@ add_custom_target(scrub
 enable_testing()
 
 add_test(output_test ${CMAKE_CURRENT_BINARY_DIR}/RunAdder)
-set_tests_properties(output_test PROPERTIES PASS_REGULAR_EXPRESSION "0")
+set_tests_properties(output_test PROPERTIES PASS_REGULAR_EXPRESSION "0;5;10")
