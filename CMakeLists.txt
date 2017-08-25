@@ -22,7 +22,7 @@ add_executable(RunAdder ${SOURCES})
 # Create the gcov target. Run coverage tests with 'make gcov'
 add_custom_target(gcov
     COMMAND mkdir -p coverage
-    COMMAND make test
+    COMMAND ${CMAKE_MAKE_PROGRAM} test
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
 add_custom_command(TARGET gcov
