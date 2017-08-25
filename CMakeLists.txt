@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(Hello CXX)
+project(CMake_GCov CXX)
 
 # Set the compiler options
 set(CMAKE_CXX_STANDARD 14)
@@ -7,17 +7,17 @@ set(CMAKE_CXX_FLAGS "-g -O0 -Wall -fprofile-arcs -ftest-coverage")
 set(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE ON)
 
 # Create OBJECT_DIR variable
-set(OBJECT_DIR ${CMAKE_BINARY_DIR}/CMakeFiles/RunHello.dir)
+set(OBJECT_DIR ${CMAKE_BINARY_DIR}/CMakeFiles/RunAdder.dir)
 message("-- Object files will be output to: ${OBJECT_DIR}")
 
 # Set the sources
 set(SOURCES
-    RunHello.cpp
-    Hello.cpp
+    RunAdder.cpp
+    Adder.cpp
     )
 
 # Create the executable
-add_executable(RunHello ${SOURCES})
+add_executable(RunAdder ${SOURCES})
 
 # Create the gcov target. Run coverage tests with 'make gcov'
 add_custom_target(gcov
@@ -28,12 +28,12 @@ add_custom_target(gcov
 add_custom_command(TARGET gcov
     COMMAND echo "=================== GCOV ===================="
     COMMAND gcov -b ${CMAKE_SOURCE_DIR}/*.cpp -o ${OBJECT_DIR}
-            | grep -A 5 "Hello.cpp" > CoverageSummary.tmp
+        | grep -A 5 "Adder.cpp" > CoverageSummary.tmp
     COMMAND cat CoverageSummary.tmp
     COMMAND echo "-- Coverage files have been output to ${CMAKE_BINARY_DIR}/coverage"
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/coverage  # Need separate command for this line
     )
-add_dependencies(gcov RunHello)
+add_dependencies(gcov RunAdder)
 # Make sure to clean up the coverage folder
 set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES coverage)
 
@@ -49,5 +49,5 @@ add_custom_target(scrub
 # Testing
 enable_testing()
 
-add_test(output_test ${CMAKE_CURRENT_BINARY_DIR}/RunHello)
-set_tests_properties(output_test PROPERTIES PASS_REGULAR_EXPRESSION "Hello")
+add_test(output_test ${CMAKE_CURRENT_BINARY_DIR}/RunAdder)
+set_tests_properties(output_test PROPERTIES PASS_REGULAR_EXPRESSION "0")
