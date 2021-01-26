@@ -17,7 +17,8 @@ add_executable(RunAdder ${SOURCES})
 set_target_properties(RunAdder PROPERTIES COMPILE_FLAGS "--coverage")
 set_target_properties(RunAdder PROPERTIES LINK_FLAGS "--coverage")
 
-# Create the covr target. Run coverage tests with 'make covr'
+# Run tests and calculate coverage with the
+# 'camke --build <build_dir> --target covr' command.
 add_custom_target(covr
     COMMAND mkdir -p coverage
     COMMAND ${CMAKE_MAKE_PROGRAM} test
