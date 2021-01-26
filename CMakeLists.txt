@@ -23,7 +23,6 @@ if(BUILD_TESTING)
     # 'camke --build <build_dir> --target covr' command.
     add_custom_target(covr
         COMMAND mkdir -p coverage
-        COMMAND ${CMAKE_MAKE_PROGRAM} test
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         )
 
