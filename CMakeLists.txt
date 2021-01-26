@@ -3,12 +3,7 @@ project(CMake_GCov CXX)
 
 # Set the compiler options
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS "-g -O0 -Wall -fprofile-arcs -ftest-coverage")
 set(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE ON)
-
-# Create OBJECT_DIR variable
-set(OBJECT_DIR ${CMAKE_BINARY_DIR}/CMakeFiles/RunAdder.dir)
-message("-- Object files will be output to: ${OBJECT_DIR}")
 
 # Set the sources
 set(SOURCES
@@ -19,27 +14,47 @@ set(SOURCES
 # Create the executable
 add_executable(RunAdder ${SOURCES})
 
-# Create the gcov target. Run coverage tests with 'make gcov'
-add_custom_target(gcov
-    COMMAND mkdir -p coverage
-    COMMAND ${CMAKE_MAKE_PROGRAM} test
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+set_target_properties(RunAdder PROPERTIES COMPILE_FLAGS "--coverage")
+set_target_properties(RunAdder PROPERTIES LINK_FLAGS "--coverage")
+
+option(BUILD_TESTING "" ON)
+if(BUILD_TESTING)
+    # Run tests and calculate coverage with the
+    # 'camke --build <build_dir> --target covr' command.
+    add_custom_target(covr
+        COMMAND mkdir -p coverage
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        )
+
+    add_custom_command(TARGET covr
+        COMMAND echo "=================== LCOV ===================="
+
+        COMMAND echo "Generating initial zero coverage..."
+        COMMAND lcov -c -i --directory ${CMAKE_BINARY_DIR}
+                        --output-file init_coverage.info --include **/*.cpp*
+
+        COMMAND echo "Generating base coverage..."
+        COMMAND lcov -c --directory ${CMAKE_BINARY_DIR}
+                        --output-file base_coverage.info --include **/*.cpp*
+
+        COMMAND echo "Generating combined coverage..."
+        COMMAND lcov -a init_coverage.info -a base_coverage.info
+                        -o coverage.info
+
+        COMMAND echo "Generating HTML report..."
+        COMMAND genhtml -o html coverage.info
+
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/coverage
     )
-add_custom_command(TARGET gcov
-    COMMAND echo "=================== GCOV ===================="
-    COMMAND gcov -b ${CMAKE_SOURCE_DIR}/*.cpp -o ${OBJECT_DIR}
-        | grep -A 5 "Adder.cpp" > CoverageSummary.tmp
-    COMMAND cat CoverageSummary.tmp
-    COMMAND echo "-- Coverage files have been output to ${CMAKE_BINARY_DIR}/coverage"
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/coverage  # Need separate command for this line
-    )
-add_dependencies(gcov RunAdder)
+endif()
+
+add_dependencies(covr RunAdder)
 # Make sure to clean up the coverage folder
 set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES coverage)
 
-# Create the gcov-clean target. This cleans the build as well as generated 
+# Create the covr-clean target. This cleans the build as well as generated
 # .gcda and .gcno files.
-add_custom_target(scrub
+add_custom_target(covr-clean
     COMMAND ${CMAKE_MAKE_PROGRAM} clean
     COMMAND rm -f ${OBJECT_DIR}/*.gcno
     COMMAND rm -f ${OBJECT_DIR}/*.gcda
@@ -47,7 +62,10 @@ add_custom_target(scrub
     )
 
 # Testing
-enable_testing()
+if(BUILD_TESTING)
+    include(CTest)
 
-add_test(output_test ${CMAKE_CURRENT_BINARY_DIR}/RunAdder)
-set_tests_properties(output_test PROPERTIES PASS_REGULAR_EXPRESSION "0;5;10")
+    add_test(output_test ${CMAKE_CURRENT_BINARY_DIR}/RunAdder)
+    set_tests_properties(
+        output_test PROPERTIES PASS_REGULAR_EXPRESSION "0;5;10")
+endif()
