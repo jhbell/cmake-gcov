@@ -37,7 +37,7 @@ add_dependencies(gcov RunAdder)
 # Make sure to clean up the coverage folder
 set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES coverage)
 
-# Create the gcov-clean target. This cleans the build as well as generated 
+# Create the gcov-clean target. This cleans the build as well as generated
 # .gcda and .gcno files.
 add_custom_target(scrub
     COMMAND ${CMAKE_MAKE_PROGRAM} clean
