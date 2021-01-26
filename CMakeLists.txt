@@ -60,7 +60,7 @@ add_custom_target(covr-clean
     )
 
 # Testing
-enable_testing()
+include(CTest)
 
 add_test(output_test ${CMAKE_CURRENT_BINARY_DIR}/RunAdder)
 set_tests_properties(output_test PROPERTIES PASS_REGULAR_EXPRESSION "0;5;10")
