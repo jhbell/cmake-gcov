@@ -3,7 +3,6 @@ project(CMake_GCov CXX)
 
 # Set the compiler options
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS "-g -O0 -Wall -fprofile-arcs -ftest-coverage")
 set(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE ON)
 
 # Create OBJECT_DIR variable
@@ -18,6 +17,9 @@ set(SOURCES
 
 # Create the executable
 add_executable(RunAdder ${SOURCES})
+
+set_target_properties(RunAdder PROPERTIES COMPILE_FLAGS "--coverage")
+set_target_properties(RunAdder PROPERTIES LINK_FLAGS "--coverage")
 
 # Create the gcov target. Run coverage tests with 'make gcov'
 add_custom_target(gcov
