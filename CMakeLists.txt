@@ -17,34 +17,37 @@ add_executable(RunAdder ${SOURCES})
 set_target_properties(RunAdder PROPERTIES COMPILE_FLAGS "--coverage")
 set_target_properties(RunAdder PROPERTIES LINK_FLAGS "--coverage")
 
-# Run tests and calculate coverage with the
-# 'camke --build <build_dir> --target covr' command.
-add_custom_target(covr
-    COMMAND mkdir -p coverage
-    COMMAND ${CMAKE_MAKE_PROGRAM} test
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    )
+option(BUILD_TESTING "" ON)
+if(BUILD_TESTING)
+    # Run tests and calculate coverage with the
+    # 'camke --build <build_dir> --target covr' command.
+    add_custom_target(covr
+        COMMAND mkdir -p coverage
+        COMMAND ${CMAKE_MAKE_PROGRAM} test
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        )
 
-add_custom_command(TARGET covr
-    COMMAND echo "=================== LCOV ===================="
+    add_custom_command(TARGET covr
+        COMMAND echo "=================== LCOV ===================="
 
-    COMMAND echo "Generating initial zero coverage..."
+        COMMAND echo "Generating initial zero coverage..."
         COMMAND lcov -c -i --directory ${CMAKE_BINARY_DIR}
                         --output-file init_coverage.info --include **/*.cpp*
 
-    COMMAND echo "Generating base coverage..."
+        COMMAND echo "Generating base coverage..."
         COMMAND lcov -c --directory ${CMAKE_BINARY_DIR}
                         --output-file base_coverage.info --include **/*.cpp*
 
-    COMMAND echo "Generating combined coverage..."
+        COMMAND echo "Generating combined coverage..."
         COMMAND lcov -a init_coverage.info -a base_coverage.info
                         -o coverage.info
 
-    COMMAND echo "Generating HTML report..."
-    COMMAND genhtml -o html coverage.info
+        COMMAND echo "Generating HTML report..."
+        COMMAND genhtml -o html coverage.info
 
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/coverage
-)
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/coverage
+    )
+endif()
 
 add_dependencies(covr RunAdder)
 # Make sure to clean up the coverage folder
@@ -60,7 +63,10 @@ add_custom_target(covr-clean
     )
 
 # Testing
-include(CTest)
+if(BUILD_TESTING)
+    include(CTest)
 
-add_test(output_test ${CMAKE_CURRENT_BINARY_DIR}/RunAdder)
-set_tests_properties(output_test PROPERTIES PASS_REGULAR_EXPRESSION "0;5;10")
+    add_test(output_test ${CMAKE_CURRENT_BINARY_DIR}/RunAdder)
+    set_tests_properties(
+        output_test PROPERTIES PASS_REGULAR_EXPRESSION "0;5;10")
+endif()
